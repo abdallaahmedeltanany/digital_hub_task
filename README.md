@@ -5,6 +5,19 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
+download the backend server (json server ) and run it on port 5000 [repo is attached to the mail ]
+
+login as admin by 
+email:test@admin.com
+pass:1234567
+--------------------------
+login as a manager by
+email:test@manager.com
+pass:1234567
+---------------------
+login as a developer by
+email:test@div.com
+pass:1234567
 npm run dev
 # or
 yarn dev
