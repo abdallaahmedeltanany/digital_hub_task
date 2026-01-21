@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Project } from "@/types";
-import { Edit } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
@@ -27,9 +27,10 @@ import ControlledButton from "../controlledComponents/ControlledButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { updateProject } from "@/store/productsSlice";
+import { toast } from "react-toastify";
 
 interface DialogProps {
-  oldData: Project;
+  oldData?: Project;
   refetch?: () => void;
 }
 
@@ -72,7 +73,7 @@ export function ControlledProjectsDialog({ oldData, refetch }: DialogProps) {
       return { previousProjects };
     },
     onSuccess: (data) => {
-      console.log("Project updated successfully:", data);
+      toast.success("Project updated successfully");
       dispatch(updateProject(data));
       queryClient.invalidateQueries({ queryKey: ["Projects"] });
       if (refetch) {
@@ -80,12 +81,11 @@ export function ControlledProjectsDialog({ oldData, refetch }: DialogProps) {
       }
     },
     onError: (error, newProject, context) => {
-      console.error("Error updating project:", error);
       if (context?.previousProjects) {
         queryClient.setQueryData(["Projects"], context.previousProjects);
       }
       setOpen(true);
-      alert("Failed to update project. Please try again.");
+      toast.error("Failed to update project. Please try again.");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["Projects"] });
@@ -99,14 +99,27 @@ export function ControlledProjectsDialog({ oldData, refetch }: DialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Edit size={16} />
+        <Button
+          variant={oldData ? "ghost" : "outline"}
+          size="icon"
+          className="h-8 w-fit p-2"
+        >
+          {oldData ? (
+            <Edit size={16} />
+          ) : (
+            <>
+              <p className="text-gray-900 font-semibold">Add Project</p>
+              <Plus size={16} />
+            </>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[700px]">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Edit Project</DialogTitle>
+            <DialogTitle className="font-bold text-gray-800">
+              {oldData ? "Edit Project" : "Add Project"}
+            </DialogTitle>
             <DialogDescription>
               Make changes to your project here. Click save when you&apos;re
               done.
@@ -125,7 +138,7 @@ export function ControlledProjectsDialog({ oldData, refetch }: DialogProps) {
             />
 
             <div className="grid gap-1">
-              <Label className="font-bold text-lg text-gray-700 px-1">
+              <Label className="font-semibold text-[16px] text-gray-800 px-1">
                 Status
               </Label>
               <Controller
@@ -203,14 +216,6 @@ export function ControlledProjectsDialog({ oldData, refetch }: DialogProps) {
             />
           </div>
           <DialogFooter className="flex gap-3">
-            <DialogClose asChild>
-              <ControlledButton
-                variant="outline"
-                name="Cancel"
-                type="button"
-                disabled={false}
-              />
-            </DialogClose>
             <ControlledButton
               variant="outline"
               name={mutation.isPending ? "Saving..." : "Save changes"}

@@ -1,7 +1,8 @@
 "use client";
+
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Home, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, LogOut, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -35,33 +36,39 @@ const Sidebar = () => {
   };
 
   return (
-    <div
+    <aside
       className={cn(
-        "relative h-screen bg-gray-900 text-white transition-all duration-300 ease-in-out",
-        collapsed ? "w-16" : "w-64"
+        "relative flex h-screen flex-col border-r border-white/5",
+        "bg-linear-to-b from-gray-900 via-gray-900 to-gray-950",
+        "transition-all duration-300 ease-in-out",
+        collapsed ? "w-16" : "w-64",
       )}
     >
-      <div className="flex h-16 items-center justify-between border-b border-gray-800 px-4">
+      <div className="flex h-16 items-center gap-2 px-4  border-b border-gray-800">
         {!collapsed && (
-          <h1 className="text-xl font-bold bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <h1 className="text-lg font-semibold tracking-wide bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Digital Hub
           </h1>
         )}
+
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto hover:bg-gray-800"
+          className={cn(
+            "ml-auto rounded-sm transition-colors",
+            "hover:bg-white/10 focus-visible: focus-visible:ring-blue-500",
+          )}
         >
           {collapsed ? (
-            <ChevronRight className="h-5 w-5" />
+            <ChevronsRight className="h-5 w-5 text-amber-50" />
           ) : (
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronsLeft className="h-5 w-5  text-amber-50" />
           )}
         </Button>
       </div>
 
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className="flex-1 px-2 py-3">
         <TooltipProvider>
           {sidebarItems.map((item) => {
             const Icon = item.icon;
@@ -72,23 +79,29 @@ const Sidebar = () => {
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className={cn(
-                      "w-full justify-start gap-3 hover:bg-gray-800",
-                      isActive && "bg-gray-800 text-blue-400",
-                      collapsed && "justify-center"
-                    )}
                     onClick={() => router.push(item.href)}
+                    className={cn(
+                      "group relative mb-1 w-full gap-3 rounded-lg px-3 py-2",
+                      "justify-start text-gray-300 transition-all",
+                      "hover:bg-white/10 hover:text-white",
+                      isActive && "bg-white/10 text-blue-400 shadow-sm",
+                      collapsed && "justify-center px-0",
+                    )}
                   >
+                    {isActive && !collapsed && (
+                      <span className="absolute left-0 h-6 w-1 rounded-r bg-blue-500" />
+                    )}
+
                     <Icon className="h-5 w-5 shrink-0" />
+
                     {!collapsed && (
                       <span className="text-sm font-medium">{item.label}</span>
                     )}
                   </Button>
                 </TooltipTrigger>
+
                 {collapsed && (
-                  <TooltipContent side="right">
-                    <p>{item.label}</p>
-                  </TooltipContent>
+                  <TooltipContent side="right">{item.label}</TooltipContent>
                 )}
               </Tooltip>
             );
@@ -96,17 +109,20 @@ const Sidebar = () => {
         </TooltipProvider>
       </nav>
 
-      <div className="border-t border-gray-800 p-2">
+      <div className="border-t border-white/5 p-2">
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                className={cn(
-                  "w-full justify-start gap-3 hover:bg-red-900/20 hover:text-red-400",
-                  collapsed && "justify-center"
-                )}
                 onClick={handleLogout}
+                className={cn(
+                  "w-full gap-3 rounded-lg px-3 py-2",
+                  "justify-start text-gray-400",
+                  "hover:bg-red-500/10 hover:text-red-400",
+                  "transition-colors",
+                  collapsed && "justify-center px-0",
+                )}
               >
                 <LogOut className="h-5 w-5 shrink-0" />
                 {!collapsed && (
@@ -114,15 +130,12 @@ const Sidebar = () => {
                 )}
               </Button>
             </TooltipTrigger>
-            {collapsed && (
-              <TooltipContent side="right">
-                <p>Logout</p>
-              </TooltipContent>
-            )}
+
+            {collapsed && <TooltipContent side="right">Logout</TooltipContent>}
           </Tooltip>
         </TooltipProvider>
       </div>
-    </div>
+    </aside>
   );
 };
 

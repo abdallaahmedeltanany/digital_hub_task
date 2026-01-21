@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -27,6 +26,7 @@ import ControlledButton from "../controlledComponents/ControlledButton";
 import { api } from "@/lib/api";
 import { useState } from "react";
 import { ITask } from "@/types";
+import { toast } from "react-toastify";
 
 interface DialogProps {
   projectId: number;
@@ -76,7 +76,7 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
 
       queryClient.setQueryData<ITask[]>(
         ["tasks", projectId.toString()],
-        (old) => [...(old || []), optimisticTask]
+        (old) => [...(old || []), optimisticTask],
       );
       setOpen(false);
 
@@ -84,15 +84,13 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
     },
 
     onError: (error, _, context) => {
-      console.error("Task adding failed:", error);
-
       if (context?.previousTasks) {
         queryClient.setQueryData(
           ["tasks", projectId.toString()],
-          context.previousTasks
+          context.previousTasks,
         );
       }
-      alert("Failed to add task!");
+      toast.error("Task adding failed");
     },
 
     onSettled: () => {
@@ -104,6 +102,7 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
     onSuccess: () => {
       reset();
       setOpen(false);
+      toast.success("Task adding Successed");
     },
   });
 
@@ -123,7 +122,9 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
       <DialogContent className="sm:max-w-[650px]">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Add New Task</DialogTitle>
+            <DialogTitle className="font-bold text-gray-800">
+              Add New Task
+            </DialogTitle>
             <DialogDescription>
               Create a new task for this project.
             </DialogDescription>
@@ -141,9 +142,8 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
               error={errors.title?.message}
             />
 
-            {/* Status */}
             <div className="grid gap-1">
-              <Label className="font-bold text-lg text-gray-700 px-1">
+              <Label className="font-semibold text-[16px] text-gray-800 px-1">
                 Status
               </Label>
               <Controller
@@ -169,9 +169,8 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
               )}
             </div>
 
-            {/* Priority */}
             <div className="grid gap-1">
-              <Label className="font-bold text-lg text-gray-700 px-1">
+              <Label className="font-semibold text-[16px] text-gray-800 px-1">
                 Priority
               </Label>
               <Controller
@@ -196,7 +195,6 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
               )}
             </div>
 
-            {/* Assigned To */}
             <ControlledInput
               label="Assigned To (User ID)"
               name="assignedTo"
@@ -211,15 +209,6 @@ export function ControlledAddTaskDialog({ projectId }: DialogProps) {
           </div>
 
           <DialogFooter className="flex gap-3">
-            <DialogClose asChild>
-              <ControlledButton
-                variant="outline"
-                name="Cancel"
-                type="button"
-                disabled={false}
-              />
-            </DialogClose>
-
             <ControlledButton
               variant="outline"
               name={mutation.isPending ? "Saving..." : "Save Task"}

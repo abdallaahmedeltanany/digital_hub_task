@@ -24,7 +24,9 @@ const ControlledInput = ({
 }: IControlledInputProps) => {
   return (
     <div>
-      <Label className="font-bold text-lg text-gray-700 px-1">{label}</Label>
+      <Label className="font-semibold text-[16px] text-gray-800 px-1">
+        {label}
+      </Label>
       <Input
         name={name}
         {...register}
