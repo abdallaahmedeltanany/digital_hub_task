@@ -408,11 +408,13 @@ const Dashboard = () => {
           </div>
 
           {dashboardStats && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <animated.div
+              style={cardAnimation}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6"
+            >
               {stats.map(
                 ({ title, value, textColor, bgColor, Icon }, index) => (
-                  <animated.div
-                    style={cardAnimation}
+                  <div
                     key={index}
                     className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-1  transition-transform duration-200"
                   >
@@ -431,10 +433,10 @@ const Dashboard = () => {
                         <Icon className={`w-6 h-6 ${textColor}`} />
                       </div>
                     </div>
-                  </animated.div>
+                  </div>
                 ),
               )}
-            </div>
+            </animated.div>
           )}
         </div>
 
