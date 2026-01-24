@@ -24,7 +24,7 @@ const ControlledButton = ({
     <Button
       variant={variant}
       type={type}
-      className="w-[200px] border-2 border-gray-800 font-semibold text-lg text-gray-700"
+      className="w-[200px] border-2 border-blue-600 font-semibold text-lg text-blue-700"
       disabled={disabled}
     >
       {name}
