@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import type { RootState } from "@/store";
 import { toast } from "react-toastify";
 import { LogIn, Shield, Sparkles } from "lucide-react";
+import { useSpring, animated } from "@react-spring/web";
+import { Spinner } from "../ui/spinner";
 
 type LoginInputs = z.infer<typeof loginSchema>;
 
@@ -28,7 +30,20 @@ const LoginForm = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const token = useSelector((state: RootState) => state.auth.token);
-
+  const formAnimation = useSpring({
+    from: {
+      opacity: 0,
+      transform: "translateX(-2000px) scale(0.95)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateX(0px) scale(1)",
+    },
+    config: {
+      tension: 120,
+      friction: 22,
+    },
+  });
   const {
     register,
     formState: { errors },
@@ -69,14 +84,15 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+    <div className="relative flex max-h-screen w-full items-center justify-center overflow-hidden bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <div className="relative w-full max-w-md">
-        <form
-          className="relative space-y-6 rounded-3xl border border-white/50 bg-white/80 p-8 shadow-2xl backdrop-blur-xl sm:p-10"
+        <animated.form
+          style={formAnimation}
+          className="relative h-fit space-y-6 rounded-3xl border border-white/50 bg-white/80 p-8 shadow-2xl backdrop-blur-xl sm:p-10"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="text-center">
-            <div className="mb-4 flex justify-center">
+            <div className="mb-1 flex justify-center">
               <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-indigo-600 shadow-lg">
                 <Shield className="h-8 w-8 text-white" />
                 <div className="absolute -right-1 -top-1">
@@ -85,7 +101,7 @@ const LoginForm = () => {
               </div>
             </div>
 
-            <h1 className="mb-2 bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-3xl font-bold text-transparent">
+            <h1 className="mb-1 bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-3xl font-bold text-transparent">
               Welcome Back
             </h1>
             <p className="text-sm font-medium text-gray-600">
@@ -104,7 +120,7 @@ const LoginForm = () => {
             </div>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-3">
             <ControlledInput
               name="email"
               type="text"
@@ -144,7 +160,7 @@ const LoginForm = () => {
               type="submit"
               variant="outline"
               disabled={isPending}
-              name={isPending ? "Logging in..." : "Login"}
+              name={isPending ? <Spinner /> : "Login"}
             />
 
             <p className="text-center text-sm text-gray-600">
@@ -173,7 +189,7 @@ const LoginForm = () => {
               </div>
             </div>
           </div>
-        </form>
+        </animated.form>
 
         <p className="mt-6 text-center text-xs text-gray-500">
           By signing in, you agree to our{" "}

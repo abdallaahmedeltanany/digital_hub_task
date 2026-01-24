@@ -10,7 +10,7 @@ interface IControlledButton {
     | "secondary"
     | "ghost"
     | null;
-  name: string;
+  name: string | React.ReactNode;
   type: "button" | "submit" | "reset" | undefined;
   disabled: boolean;
 }

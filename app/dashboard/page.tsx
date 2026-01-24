@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSpring, animated } from "@react-spring/web";
 
 const Dashboard = () => {
   const [pageNo, setPageNo] = React.useState<number>(1);
@@ -26,12 +27,38 @@ const Dashboard = () => {
   const totalPageNo = 4;
   const dispatch = useDispatch();
 
+  const cardAnimation = useSpring({
+    from: {
+      opacity: 0,
+      transform: "translatex(4000px) scale(0.95)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateY(0px) scale(1)",
+    },
+    config: { tension: 100, friction: 26 },
+
+    immediate: false,
+  });
+  const tableAnimation = useSpring({
+    from: {
+      opacity: 0,
+      transform: "translatey(2000px) scale(0.95)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateY(0px) scale(1)",
+    },
+    config: { tension: 100, friction: 26 },
+
+    immediate: false,
+  });
+
   const { filteredProjects, searchQuery, statusFilter } = useSelector(
     (state: RootState) => state.projects,
   );
   const { user } = useSelector((state: RootState) => state.auth);
 
-  // ------------------ Table Data API Call ------------------
   const fetchTableData = async () => {
     const res = await api.get(
       `/projects?_page=${pageNo}&_per_page=${pageSize}`,
@@ -50,9 +77,8 @@ const Dashboard = () => {
     }
   }, [data, dispatch]);
 
-  // ------------------ Dashboard Stats API Call ------------------
   const fetchDashboardStats = async () => {
-    const res = await api.get("/projects"); // full dataset for stats
+    const res = await api.get("/projects");
     return res?.data;
   };
 
@@ -292,8 +318,64 @@ const Dashboard = () => {
       },
     },
   ];
+  if (!dashboardStats) return;
+  const stats = [
+    {
+      title: "Total Projects",
+      value: dashboardStats.total,
+      textColor: "text-blue-600",
+      bgColor: "bg-blue-100",
+      Icon: StickyNote,
+    },
+    {
+      title: "Active",
+      value: dashboardStats.active,
+      textColor: "text-blue-600",
+      bgColor: "bg-blue-100",
+      Icon: RefreshCcwDot,
+    },
+    {
+      title: "Completed",
+      value: dashboardStats.completed,
+      textColor: "text-emerald-600",
+      bgColor: "bg-emerald-100",
+      Icon: CircleCheckBig,
+    },
+    {
+      title: "Avg Progress",
+      value: `${dashboardStats.avgProgress}%`,
+      textColor: "text-purple-600",
+      bgColor: "bg-purple-100",
+      Icon: ({ className }: { className: string }) => (
+        <svg
+          className={className}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+          />
+        </svg>
+      ),
+    },
+    {
+      title: "Total Budget",
+      value: new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        notation: "compact",
+        maximumFractionDigits: 1,
+      }).format(dashboardStats.totalBudget),
+      textColor: "text-green-600",
+      bgColor: "bg-green-100",
+      Icon: BadgeDollarSign,
+    },
+  ];
 
-  // ------------------ Loading Spinner ------------------
   if (isLoading || isStatsLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen w-full bg-linear-to-br from-gray-50 to-gray-100">
@@ -327,113 +409,39 @@ const Dashboard = () => {
 
           {dashboardStats && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-              {/* Total Projects */}
-              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Total Projects
-                    </p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {dashboardStats.total}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <StickyNote className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Active */}
-              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Active
-                    </p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {dashboardStats.active}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <RefreshCcwDot className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Completed */}
-              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Completed
-                    </p>
-                    <p className="text-2xl font-bold text-emerald-600">
-                      {dashboardStats.completed}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <CircleCheckBig className="w-6 h-6 text-emerald-600" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Avg Progress */}
-              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Avg Progress
-                    </p>
-                    <p className="text-2xl font-bold text-purple-600">
-                      {dashboardStats.avgProgress}%
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-purple-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Total Budget */}
-              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Total Budget
-                    </p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                        notation: "compact",
-                        maximumFractionDigits: 1,
-                      }).format(dashboardStats.totalBudget)}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <BadgeDollarSign className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-              </div>
+              {stats.map(
+                ({ title, value, textColor, bgColor, Icon }, index) => (
+                  <animated.div
+                    style={cardAnimation}
+                    key={index}
+                    className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-1  transition-transform duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 mb-1">
+                          {title}
+                        </p>
+                        <p className={`text-2xl font-bold ${textColor}`}>
+                          {value}
+                        </p>
+                      </div>
+                      <div
+                        className={`w-12 h-12 ${bgColor} rounded-lg flex items-center justify-center`}
+                      >
+                        <Icon className={`w-6 h-6 ${textColor}`} />
+                      </div>
+                    </div>
+                  </animated.div>
+                ),
+              )}
             </div>
           )}
         </div>
 
-        {/* Data Table Card */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <animated.div
+          style={tableAnimation}
+          className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+        >
           <DataTable
             columns={columns}
             data={filteredProjects || []}
@@ -446,7 +454,7 @@ const Dashboard = () => {
             statusFilter={statusFilter}
             setStatusFilter={handleStatusChange}
           />
-        </div>
+        </animated.div>
       </div>
     </div>
   );

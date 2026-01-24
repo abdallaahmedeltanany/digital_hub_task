@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSpring, animated } from "@react-spring/web";
 
 interface StatusConfig {
   bg: string;
@@ -264,6 +265,44 @@ const ProjectDetailsCard: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
+  const cardAnimation = useSpring({
+    from: {
+      opacity: 0,
+      transform: "translatex(4000px) scale(0.95)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateY(0px) scale(1)",
+    },
+    config: { tension: 100, friction: 26 },
+
+    immediate: false,
+  });
+  const progressBarAnimation = useSpring({
+    from: {
+      opacity: 0,
+      transform: "translatey(2000px) scale(0.95)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateY(0px) scale(1)",
+    },
+    config: { tension: 100, friction: 26 },
+
+    immediate: false,
+  });
+  const taskCardsAnimation = useSpring({
+    from: {
+      opacity: 0,
+      transform: "translatey(2000px) scale(0.95)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateY(0px) scale(1)",
+    },
+    config: { tension: 100, friction: 26 },
+  });
+
   const fetchProject = useCallback(async () => {
     try {
       const res = await api.get(`/projects/${params.id}`);
@@ -322,7 +361,6 @@ const ProjectDetailsCard: React.FC = () => {
       );
     }
 
-    // Status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter(
         (task: ITask) =>
@@ -458,7 +496,10 @@ const ProjectDetailsCard: React.FC = () => {
           </CardHeader>
 
           <CardContent className="space-y-8 p-6 sm:p-8">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <animated.div
+              style={cardAnimation}
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
               <StatsCard
                 icon={<Calendar className="h-5 w-5" />}
                 label="Start Date"
@@ -491,9 +532,12 @@ const ProjectDetailsCard: React.FC = () => {
                 iconBg="bg-purple-100"
                 iconColor="text-purple-600"
               />
-            </div>
+            </animated.div>
 
-            <section className="space-y-4 rounded-xl border border-gray-200 bg-linear-to-br from-gray-50 to-white p-6">
+            <animated.section
+              style={progressBarAnimation}
+              className="space-y-4 rounded-xl border border-gray-200 bg-linear-to-br from-gray-50 to-white p-6"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-gray-800">
                   <TrendingUp className="h-5 w-5 text-blue-600" />
@@ -535,7 +579,7 @@ const ProjectDetailsCard: React.FC = () => {
                   </span>
                 )}
               </div>
-            </section>
+            </animated.section>
           </CardContent>
         </Card>
 
@@ -651,11 +695,14 @@ const ProjectDetailsCard: React.FC = () => {
                 </div>
               )
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <animated.div
+                style={taskCardsAnimation}
+                className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+              >
                 {filteredTasks.map((task: ITask) => (
                   <TaskCard key={task.id} task={task} />
                 ))}
-              </div>
+              </animated.div>
             )}
           </CardContent>
         </Card>
